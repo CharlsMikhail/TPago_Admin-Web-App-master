@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filtrar Operaciones</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS for Dark Theme -->
+    <style>
+        body {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .form-control, .btn {
+            background-color: #495057;
+            color: #ffffff;
+            border: 1px solid #6c757d;
+        }
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+        .form-control:focus {
+            background-color: #495057;
+            color: #ffffff;
+            border: 1px solid #6c757d;
+        }
+        .table {
+            color: #ffffff;
+        }
+        .table th, .table td {
+            border-top: 1px solid #6c757d;
+        }
+        .table thead th {
+            border-bottom: 2px solid #6c757d;
+        }
+        .logo-container {
+            background-color: #BDBDBD;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .pagination {
+            justify-content: center;
+        }
+        .pagination-control {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 20px; /* Agrega margen inferior aquí */
+        }
+        .pagination-control button {
+            margin: 0 5px;
+            background-color: #495057;
+            color: #ffffff;
+            border: 1px solid #6c757d;
+        }
+        .pagination-control span {
+            margin: 0 10px;
+        }
+    </style>
+    <script>
+        function exportTableToExcel(filename = "") {
+            // Select the table element
+            const table = document.querySelector(".table");
+
+            // Generate CSV content
+            let csvContent = "";
+            const rows = table.querySelectorAll("tr");
+
+            rows.forEach(row => {
+                const cols = row.querySelectorAll("th, td");
+                const rowData = [];
+
+                cols.forEach(col => {
+                    rowData.push(col.innerText);
+                });
+
+                csvContent += rowData.join(",") + "\n";
+            });
+
+            // Create a link element
+            const downloadLink = document.createElement("a");
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+
+            downloadLink.href = url;
+            downloadLink.download = filename || 'operaciones.csv';
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const idOperacionInput = document.getElementById("idOperacion");
+            const numCuentaOrigenInput = document.getElementById("num_cuenta_origen");
+            const fechaInput = document.getElementById("fecha");
+            const fechaInicioInput = document.getElementById("fechaInicio");
+            const fechaFinInput = document.getElementById("fechaFin");
+
+            idOperacionInput.addEventListener("input", function() {
+                this.value = this.value.replace(/\D/g, ''); // Remove any non-digit character
+            });
+
+            numCuentaOrigenInput.addEventListener("input", function() {
+                this.value = this.value.replace(/\D/g, ''); // Remove any non-digit character
+            });
+
+            const validateFutureDate = (input) => {
+                const today = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
+                if (input.value > today) {
+                    alert("La fecha no puede ser futura.");
+                    input.value = '';
+                }
+            };
+
+            fechaInput.addEventListener("change", function() {
+                validateFutureDate(this);
+            });
+
+            fechaInicioInput.addEventListener("change", function() {
+                validateFutureDate(this);
+            });
+
+            fechaFinInput.addEventListener("change", function() {
+                validateFutureDate(this);
+            });
+
+            // Initialize pagination
+            paginateTable(1);
+        });
+
+        function paginateTable(page) {
+            const rows = document.querySelectorAll('.table tbody tr');
+            const rowsPerPage = 10;
+            const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+            rows.forEach((row, index) => {
+                row.style.display = (index >= (page - 1) * rowsPerPage && index < page * rowsPerPage) ? '' : 'none';
+            });
+
+            // Update pagination controls
+            const paginationControl = document.querySelector('.pagination-control');
+            paginationControl.innerHTML = '';
+
+            const prevButton = document.createElement('button');
+            prevButton.innerText = '<';
+            prevButton.disabled = page === 1;
+            prevButton.addEventListener('click', function() {
+                paginateTable(page - 1);
+            });
+
+            const nextButton = document.createElement('button');
+            nextButton.innerText = '>';
+            nextButton.disabled = page === totalPages;
+            nextButton.addEventListener('click', function() {
+                paginateTable(page + 1);
+            });
+
+            const pageNumber = document.createElement('span');
+            pageNumber.innerText = `Page ${page} of ${totalPages}`;
+
+            paginationControl.appendChild(prevButton);
+            paginationControl.appendChild(pageNumber);
+            paginationControl.appendChild(nextButton);
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="logo-container">
+        <img src="/Group 4174.png" alt="Logo" class="logo">
+    </div>
+    <br>
+    <h1 class="mb-4">Filtrar Operaciones</h1>
+    <form method="get" action="/operaciones" class="mb-5">
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label for="idOperacion">ID Operación</label>
+                <input type="text" name="idOperacion" id="idOperacion" class="form-control" placeholder="ID Operación">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="num_cuenta_origen">Número Movil</label>
+                <input type="text" name="num_cuenta_origen" id="num_cuenta_origen" class="form-control" placeholder="Número Movil (Cuenta) Origen">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="fecha">Fecha</label>
+                <input type="date" name="fecha" id="fecha" class="form-control">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="fechaInicio">Fecha Inicio</label>
+                <input type="date" name="fechaInicio" id="fechaInicio" class="form-control">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="fechaFin">Fecha Fin</label>
+                <input type="date" name="fechaFin" id="fechaFin" class="form-control">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Buscar Operaciones</button>
+    </form>
+
+    <div>
+        <h2 class="mb-4">Operaciones</h2>
+        <th:block th:if="${operaciones != null}">
+            <button class="btn btn-success" onclick="exportTableToExcel('operaciones.csv')">Exportar a Excel</button>
+            <div class="table-responsive">
+                <table class="table table-dark table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>DNI Persona</th>
+                        <th>Número Móvil (Cuenta) Origen</th>
+                        <th>Nombre Completo</th>
+                        <th>Número Móvil (Cuenta) Destino</th>
+                        <th>Fecha Operación</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="operacion : ${operaciones}">
+                        <tr>
+                            <td th:text="${operacion['id_operacion']}"></td>
+                            <td th:text="${operacion['dni_persona']}"></td>
+                            <td th:text="${operacion['num_cuenta_origen']}"></td>
+                            <td th:text="${operacion['nombre_completo']}"></td>
+                            <td th:text="${operacion['num_cuenta_destino']}"></td>
+                            <td th:text="${operacion['fecha_operacion']}"></td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-control">
+                <button>&lt;</button>
+                <span>Page 1 of 1</span>
+                <button>&gt;</button>
+            </div>
+        </th:block>
+        <th:block th:if="${operaciones == null || operaciones.isEmpty()}">
+            <p>No se encontraron operaciones.</p>
+        </th:block>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lista de Reportes</title>
+</head>
+<body>
+    <h1>Lista de Reportes</h1>
+    <form th:action="@{/reportes}" method="get">
+        <label for="departamento">Departamento:</label>
+        <select id="departamento" name="departamento" th:field="*{departamento}">
+            <option value="">Seleccione</option>
+            <option th:each="departamento : ${departamentos}" th:value="${departamento}" th:text="${departamento}"></option>
+        </select>
+
+        <label for="provincia">Provincia:</label>
+        <select id="provincia" name="provincia" th:field="*{provincia}">
+            <option value="">Seleccione</option>
+            <option th:each="provincia : ${provincias}" th:value="${provincia}" th:text="${provincia}"></option>
+        </select>
+
+        <label for="distrito">Distrito:</label>
+        <select id="distrito" name="distrito" th:field="*{distrito}">
+            <option value="">Seleccione</option>
+            <option th:each="distrito : ${distritos}" th:value="${distrito}" th:text="${distrito}"></option>
+        </select>
+
+        <label for="fecha">Fecha de Operación:</label>
+        <input type="date" id="fecha" name="fecha" th:field="*{fecha}">
+
+        <button type="submit">Buscar</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Departamento</th>
+                <th>Provincia</th>
+                <th>Distrito</th>
+                <th>Fecha de Operacion</th>
+                <th>DNI</th>
+                <th>Número de Operacion</th>
+                <th>Teléfono</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="reporte : ${reportes}">
+                <td th:text="${reporte.departamento}"></td>
+                <td th:text="${reporte.provincia}"></td>
+                <td th:text="${reporte.distrito}"></td>
+                <td th:text="${reporte.fechaOperacion}"></td>
+                <td th:text="${reporte.dni}"></td>
+                <td th:text="${reporte.numeroOperacion}"></td>
+                <td th:text="${reporte.telefono}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
